@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View,ScrollView ,FlatList, Text } from 'react-native';
+import { View,FlatList, Text } from 'react-native';
 import { Tile } from 'react-native-elements';
 import * as Animatable from 'react-native-animatable';
 import { connect } from 'react-redux';

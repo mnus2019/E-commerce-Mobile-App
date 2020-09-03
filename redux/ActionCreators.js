@@ -188,3 +188,119 @@ export const addClothes = (clothes) => ({
   payload: clothes,
 });
 
+export const fetchComments = () => (dispatch) => {
+  return fetch(baseUrl + "comments")
+    .then(
+      (response) => {
+        if (response.ok) {
+          return response;
+        } else {
+          const error = new Error(
+            `Error ${response.status}: ${response.statusText}`
+          );
+          error.response = response;
+          throw error;
+        }
+      },
+      (error) => {
+        const errMess = new Error(error.message);
+        throw errMess;
+      }
+    )
+    .then((response) => response.json())
+    .then((comments) => dispatch(addComments(comments)))
+    .catch((error) => dispatch(commentsFailed(error.message)));
+};
+
+export const commentsFailed = (errMess) => ({
+  type: ActionTypes.COMMENTS_FAILED,
+  payload: errMess,
+});
+
+export const addComments = (comments) => ({
+  type: ActionTypes.ADD_COMMENTS,
+  payload: comments,
+});
+
+export const postComment = (locationId, rating,author, text) => (dispatch) => {
+  const newComment = {
+    campsiteId:locationId,
+    rating:rating,
+    author: author,
+    text: text
+  
+  };
+  newComment.date = new Date().toISOString();
+
+  
+  return fetch(baseUrl + "comments", {
+    method: "POST",
+    body: JSON.stringify(newComment),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then(
+      (response) => {
+        if (response.ok) {
+          return response;
+        } else {
+          const error = new Error(
+            `Error ${response.status}: ${response.statusText}`
+          );
+          error.response = response;
+          throw error;
+        }
+      },
+      (error) => {
+        throw error;
+      }
+    )
+    .then((response) => response.json())
+    .then((response) => dispatch(addComment(response)))
+    .catch((error) => {
+      console.log("post comment", error.message);
+      alert("Your comment could not be posted\nError: " + error.message);
+    });
+  
+};
+
+export const addComment = (comment) => ({
+  type: ActionTypes.ADD_COMMENT,
+  payload: comment,
+});
+
+
+
+
+export const addItemToCart = ( item) => (dispatch) => {
+
+  dispatch(addCart(item))
+};
+
+export const addCart = (item) => ({
+  type: ActionTypes.ADD_TO_CART,
+  payload: item,
+});
+
+
+export const deleteItemFromCart = ( item) => (dispatch) => {
+
+  dispatch(deleteCart(item))
+};
+
+export const deleteCart = (item) => ({
+  type: ActionTypes.REMOVE_FROM_CART,
+  payload: item,
+});
+
+export const postFavorite = (campsiteId) => (dispatch) => {
+  setTimeout(() => {
+    dispatch(addFavorite(campsiteId));
+  }, 2000);
+};
+
+export const addFavorite = (campsiteId) => ({
+  type: ActionTypes.ADD_FAVORITE,
+  payload: campsiteId,
+});
