@@ -1,7 +1,8 @@
-import React, { Component } from "react";
-import { View, FlatList, Text,StyleSheet,Share,
-  Image} from 'react-native';
-import { Card,SearchBar,Icon } from 'react-native-elements';
+import React, {useState} from "react";
+import { View, FlatList, Text,StyleSheet,Share,TextInput,
+  Image,
+  ScrollView} from 'react-native';
+import { Card,Icon } from 'react-native-elements';
 import * as Animatable from 'react-native-animatable';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
@@ -25,21 +26,53 @@ const mapStateToProps = state => {
   };
 };
 
-class CoffeeShop extends Component {
-
-
-  static navigationOptions = {
-    title: "Coffee Shop",
+CoffeeShop.navigationOptions = {
+  title: "Coffee Shop",
     headerRight:(
       <ShoppingCartIcon/>
     ),
-  
-   
   };
 
+function CoffeeShop(props) {
 
-  render() {
-    const { navigate } = this.props.navigation;
+
+
+  const [orderBy,setOrderBy]=useState('name');
+  const [orderDir,setOrderDir]=useState('asc');
+  const [queryText,setQueryText]=useState('');
+
+
+     let order;
+    let filteredCoffees = props.coffees.coffees;
+    if(orderDir === 'asc'){
+      order = 1;
+    }else{
+      order = -1;
+    }
+     filteredCoffees= filteredCoffees.sort((a,b)=>{
+      if(a[orderBy].toLowerCase() <
+         b[orderBy].toLowerCase()
+         ){
+           return -1 * order;
+         }else{
+           return  1 * order;
+         }
+ 
+    })
+    .filter(eachItem => {
+      return(
+        eachItem['name'] 
+        .toLowerCase()
+       .includes(queryText.toLowerCase()) ||
+        eachItem['price']
+        .toLowerCase()
+       .includes(queryText.toLowerCase()) ||
+        eachItem['text']
+        .toLowerCase()
+       .includes(queryText.toLowerCase()) 
+      );
+    })
+
     const sharecoffees = (title, message, url) => {
       Share.share(
         {
@@ -59,9 +92,10 @@ class CoffeeShop extends Component {
       return (
         <Animatable.View
         animation='fadeInDown'
-        duration={2000}
-        delay={1000}
+        duration={1000}
+        delay={100}
        >
+        
   <Card
     featuredTitle={item.name}
   
@@ -76,7 +110,7 @@ class CoffeeShop extends Component {
         color="#f50"
         raised
         reverse
-        onPress={() =>    this.props.addItemToCart(item)}
+        onPress={() =>    props.addItemToCart(item)}
        
       />
         <Icon
@@ -101,27 +135,42 @@ class CoffeeShop extends Component {
 </Animatable.View>
       );
     };
-    if (this.props.coffees.isLoading) {
+    if (props.coffees.isLoading) {
       return <Loading />;
   }
-  if (this.props.coffees.errMess) {
+  if (props.coffees.errMess) {
       return (
           <View>
-              <Text>{this.props.coffees.errMess}</Text>
+              <Text>{props.coffees.errMess}</Text>
          </View>
       );
   }
   return (
+  
+        
+  <ScrollView>
+     <View style={styles.container}>
+        <TextInput
+        placeholder=" Search Here"
+        onChangeText={(search) => setQueryText(search)}
+          style={styles.searchBar}
+        />
+    
+      </View>
   <View>
-       <FlatList 
-      data={this.props.coffees.coffees}
-      renderItem={renderDirectoryItem}
-      keyExtractor={item => item.id.toString()}
-  />
-  </View>
+    
+    <FlatList 
+   data={filteredCoffees}
+   renderItem={renderDirectoryItem}
+   keyExtractor={item => item.id.toString()}
+/>
+</View>
+
+  </ScrollView>
+ 
     );
   }
-}
+
 
 const styles=StyleSheet.create({
   cardRow: {
@@ -139,6 +188,26 @@ const styles=StyleSheet.create({
     width: null,
     height: 300,
     resizeMode: 'cover'
+},container: {
+  backgroundColor: 'black',
+  alignItems: 'center',
+    },
+searchBar: {
+  fontSize: 24,
+  textAlign: "center",
+  margin: 10,
+  width: '90%',
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: 'white',
+},
+itemText: {
+  margin: 10,
+  color: 'white',
+  fontSize: 24,
+  backgroundColor: 'blue',
+  width: '100%',
+  height: 50
 }
 })
 

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState} from "react";
 import {
   View,
   Button,
@@ -19,60 +19,56 @@ const mapDispatchToProps = {
     postComment( rating, firstName, lastName),
 };
 
-class Member extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      firstName: "",
-      lastName: "",
-      comment: "",
-      rating:5
-    };
-  }
-
-  static navigationOptions = {
-    title: "Member",
+Member.navigationOptions = {
+  title: 'Member',
   };
+
+function Member(props){ 
+
+  const [firstName,setFirstName]=useState('');
+  const [campers,setCampers]=useState(1);
+  const [lastName,setLastName]=useState('');
+  const [comment,setComment]=useState('');
+  const [rating,setRating]=useState(5);
 
   handleForm = () => {
     const regex = /^([a-zA-Z]+\s)*[a-zA-Z]+$/;
-    const firstNamevalue = regex.test(this.state.firstName);
-    const lastNamevalue = regex.test(this.state.lastName);
-    if (this.state.firstName.length < 2 || !firstNamevalue) {
+    const firstNamevalue = regex.test(firstName);
+    const lastNamevalue = regex.test(lastName);
+    if (firstName.length < 2 || !firstNamevalue) {
       Alert.alert("Alert", "please Enter First Name ");
       return;
     }
-    if (this.state.lastName.length < 2 || !lastNamevalue) {
+    if (lastName.length < 2 || !lastNamevalue) {
       Alert.alert("Alert", "please Enter  Last Name");
       return;
     }
-    if (this.state.comment.length < 2) {
+    if (comment.length < 2) {
       Alert.alert("Please Enter comment !!!");
       return;
     }
   
-    this.props.postComment(this.state.rating,this.state.firstName, this.state.lastName);
+    props.postComment(rating,firstName, lastName);
     Alert.alert("Alert", "Thank you for being a Member!!!");
   };
 
-  resetForm() {
-    this.setState({
-      firstName: "",
-      lastName: "",
-      comment:""
-    });
+  resetForm=()=> {
+    setFirstName('');
+    setLastName('');
+    setComment('');
+   
   }
 
-  render() {
-    const { navigate } = this.props.navigation;
+
+    const { navigate } = props.navigation;
     return (
       <ScrollView>
         <View style={styles.modal}>
         <Rating
               showRating
-              startingValue={this.state.rating}
+              startingValue={rating}
               imageSize={40}
-              onFinishRating={(rating) => this.setState({ rating: rating })}
+              onFinishRating={(rating) => setRating( rating )}
               style={{ paddingVertical: 10,margin: 10 ,backgroundColor: "#FFFFFF",}}
             />
           <Input
@@ -80,8 +76,8 @@ class Member extends Component {
             placeholder="First Name"
             leftIcon={{ type: "font-awesome", name: "user-o" }}
             leftIconContainerStyle={{ paddingRight: 10 }}
-            onChangeText={(text) => this.setState({ firstName: text })}
-            value={this.state.firstName}
+            onChangeText={(text) => setFirstName( text )}
+            value={firstName}
             maxLength={16}
           />
 
@@ -89,8 +85,8 @@ class Member extends Component {
             placeholder="Last Name"
             leftIcon={{ type: "font-awesome", name: "user-o" }}
             leftIconContainerStyle={{ paddingRight: 10 }}
-            onChangeText={(text) => this.setState({ lastName: text })}
-            value={this.state.lastName}
+            onChangeText={(text) => setLastName( text )}
+            value={lastName}
             maxLength={16}
           />
 
@@ -100,8 +96,8 @@ class Member extends Component {
               underlineColorAndroid="transparent"
               placeholder={"Type Something in Text Area."}
               placeholderTextColor={"#9E9E9E"}
-              onChangeText={(text) => this.setState({ comment: text })}
-              value={this.state.comment}
+              onChangeText={(text) => setComment( text )}
+              value={comment}
               numberOfLines={10}
               multiline={true}
             />
@@ -110,9 +106,9 @@ class Member extends Component {
             <Text style={styles.formLabel}>Contact By</Text>
             <Picker
               style={styles.formItem}
-              selectedValue={this.state.campers}
+              selectedValue={campers}
               onValueChange={(itemValue) =>
-                this.setState({ campers: itemValue })
+                setCampers( itemValue)
               }
             >
               <Picker.Item label="Phone" value="Phone" />
@@ -124,8 +120,8 @@ class Member extends Component {
               title="Submit"
               color="#5637DD"
               onPress={() => {
-                this.handleForm();
-                this.resetForm();
+                handleForm();
+                resetForm();
               }}
             />
           </View>
@@ -133,7 +129,7 @@ class Member extends Component {
             <Button
               onPress={() => {
                 navigate("Home");
-                this.resetForm();
+                  resetForm();
               }}
               color="#808080"
               title="Cancel"
@@ -143,7 +139,7 @@ class Member extends Component {
       </ScrollView>
     );
   }
-}
+
 const styles = StyleSheet.create({
   cardRow: {
     alignItems: "center",

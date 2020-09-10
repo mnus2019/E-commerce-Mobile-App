@@ -32,20 +32,7 @@ class LoginTab extends Component {
         )
     }
 
-    // handleLogin() {
-    //     console.log(JSON.stringify(this.state));
-    //     if (this.state.remember) {
-    //         SecureStore.setItemAsync('userinfo', JSON.stringify(
-    //             {username: this.state.username, password: this.state.password}))
-    //             .catch(error => console.log('Could not save user info', error));
-       
-
-    //     } else {
-    //         SecureStore.deleteItemAsync('userinfo')
-    //             .catch(error => console.log('Could not delete user info', error));
-    //     }
-    // }
-
+    
     componentDidMount() {
         SecureStore.getItemAsync('userinfo')
             .then(userdata => {

@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { View, FlatList,StyleSheet,Image, Text,Share } from 'react-native';
+import React, { useState } from "react";
+import { View, FlatList,StyleSheet,Image, Text,Share,TextInput, ScrollView } from 'react-native';
 import { Card, Icon} from "react-native-elements";
 import * as Animatable from 'react-native-animatable';
 import { connect } from 'react-redux';
@@ -20,21 +20,55 @@ const mapStateToProps = state => {
   };
 };
 
-class ClotheShop extends Component {
+ClotheShop.navigationOptions = {
+  title: "Clothes Shop",
+    
+  headerRight:(
+    <ShoppingCartIcon/>
+
+  )
+  };
+
+function ClotheShop (props){
  
 
-  static navigationOptions = {
-    title: "Clothes Shop",
-    
-      headerRight:(
-        <ShoppingCartIcon/>
-
-      )
-  };
+  const [orderBy,setOrderBy]=useState('name');
+  const [orderDir,setOrderDir]=useState('asc');
+  const [queryText,setQueryText]=useState('');
   
 
-  render() {
-    const { navigate } = this.props.navigation;
+ 
+    const { navigate } = props.navigation;
+    let order;
+    let filteredClothes = props.clothes.clothes;
+    if(orderDir === 'asc'){
+      order = 1;
+    }else{
+      order = -1;
+    }
+     filteredClothes= filteredClothes.sort((a,b)=>{
+      if(a[orderBy].toLowerCase() <
+         b[orderBy].toLowerCase()
+         ){
+           return -1 * order;
+         }else{
+           return  1 * order;
+         }
+ 
+    })
+    .filter(eachItem => {
+      return(
+        eachItem['name'] 
+        .toLowerCase()
+       .includes(queryText.toLowerCase()) ||
+        eachItem['price']
+        .toLowerCase()
+       .includes(queryText.toLowerCase()) ||
+        eachItem['text']
+        .toLowerCase()
+       .includes(queryText.toLowerCase()) 
+      );
+    })
     const shareClothes = (title, message, url) => {
       Share.share(
         {
@@ -48,12 +82,12 @@ class ClotheShop extends Component {
       );
     };
   
-    const renderDirectoryItem = ({ item }) => {
+    const renderClotheItem = ({ item }) => {
       return (
         <Animatable.View
         animation='fadeInDown'
-        duration={2000}
-        delay={1000}
+        duration={1000}
+        delay={100}
        >
   <Card 
     featuredTitle={item.name}
@@ -70,7 +104,7 @@ class ClotheShop extends Component {
         color="#f50"
         raised
         reverse
-        onPress={() =>    this.props.addItemToCart(item)}
+        onPress={() =>    props.addItemToCart(item)}
        
       />
         <Icon
@@ -97,25 +131,35 @@ class ClotheShop extends Component {
     };
 
    
-    if (this.props.clothes.isLoading) {
+    if (props.clothes.isLoading) {
       return <Loading />;
   }
-  if (this.props.clothes.errMess) {
+  if (props.clothes.errMess) {
       return (
           <View>
-              <Text>{this.props.clothes.errMess}</Text>
+              <Text>{props.clothes.errMess}</Text>
          </View>
       );
   }
   return (
+   <ScrollView>
+      <View style={styles.container}>
+    <TextInput
+    placeholder=" Search Here"
+    onChangeText={(search) => setQueryText(search)}
+      style={styles.searchBar}
+    />
+
+  </View>
       <FlatList 
-      data={this.props.clothes.clothes}
-      renderItem={renderDirectoryItem}
+      data={filteredClothes}
+      renderItem={renderClotheItem}
       keyExtractor={item => item.id.toString()}
   />
+   </ScrollView>
     );
   }
-}
+
 const styles=StyleSheet.create({
   cardRow: {
     alignItems: "center",
@@ -132,6 +176,27 @@ const styles=StyleSheet.create({
     width: null,
     height: 300,
     resizeMode: 'cover'
+},  container: {
+  backgroundColor: 'black',
+  alignItems: 'center',
+ 
+},
+searchBar: {
+  fontSize: 24,
+  textAlign: "center",
+  borderRadius: 20,
+  margin: 10,
+  width: '90%',
+  height: 40,
+  backgroundColor: 'white',
+},
+itemText: {
+  margin: 10,
+  color: 'white',
+  fontSize: 24,
+  backgroundColor: 'blue',
+  width: '100%',
+  height: 50
 }
 })
 

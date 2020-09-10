@@ -9,7 +9,7 @@ const mapStateToProps = (state) => {
   return {
     coffees: state.coffees,
   suites: state.suites,
-  locations: state.locations,
+  clothes: state.clothes,
    
   };
 };
@@ -78,9 +78,9 @@ componentDidMount() {
           errMess={this.props.suites.errMess}
       />
           <RenderItem
-          item={this.props.locations.locations.filter(location=>location.campsiteId==1)[0]}
-          isLoading={this.props.locations.isLoading}
-          errMess={this.props.locations.errMess}
+          item={this.props.clothes.clothes.filter(cloth=>cloth.price==60)[0]}
+          isLoading={this.props.clothes.isLoading}
+          errMess={this.props.clothes.errMess}
       />
       
   </Animated.ScrollView>

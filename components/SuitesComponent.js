@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import { View, FlatList, Text, StyleSheet,Image,
-   PanResponder,Alert, Modal, Button, ScrollView,Share } from 'react-native';
-import { Card, Icon, Rating, Input } from "react-native-elements";
+import React, { useState } from "react";
+import { View, FlatList, Text, StyleSheet,Image,TextInput,
+   ScrollView,Share } from 'react-native';
+import { Card, Icon } from "react-native-elements";
 import * as Animatable from 'react-native-animatable';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
@@ -24,67 +24,56 @@ const mapDispatchToProps = {
     deleteItemFromCart: (item) =>deleteItemFromCart(item),
 };
 
-class SuiteShop extends Component {
- 
-//   constructor(props) {
-//     super(props)
-//     this.animatedValue = new Animated.Value(0)
-// }
-constructor(props) {
-  super(props);
-  this.state = {
-    showModal: false,
-    rating: 5,
-    author: "",
-    text: "",
-    authorError: "",
-    commentError: "",
-  };
-}
 
-toggleModal() {
-  this.setState({ showModal: !this.state.showModal });
-}
-
-handleComment(campsiteId) {
-  const regex = /^([a-zA-Z]+\s)*[a-zA-Z]+$/;
-  const value = regex.test(this.state.author);
-  if (this.state.author.length < 2 || !value) {
-    Alert.alert("Please Enter correct Name !!!");
-    return;
-  }
-  if (this.state.text.length < 2) {
-    Alert.alert("Please Enter comment !!!");
-    return;
-  }
-
-  this.props.postComment(
-    campsiteId,
-    this.state.rating,
-    this.state.author,
-    this.state.text
-  );
-  this.toggleModal();
-}
-
-resetForm() {
-  this.setState({
-    author: "",
-    text: "",
-  });
-}
-
-
-  static navigationOptions = {
-    title: "Coworking Place",
+    
+SuiteShop.navigationOptions = {
+  title: "Rent Coworking Place",
     headerRight:(
       <ShoppingCartIcon/>
-    )
+    ),
   };
+
+function SuiteShop(props) {
  
 
 
-  render() {
+ 
+const [orderBy,setOrderBy]=useState('name');
+const [orderDir,setOrderDir]=useState('asc');
+const [queryText,setQueryText]=useState('');
+
+
+ 
+    let order;
+    let filteredSuites = props.suites.suites;
+    if(orderDir === 'asc'){
+      order = 1;
+    }else{
+      order = -1;
+    }
+     filteredSuites= filteredSuites.sort((a,b)=>{
+      if(a[orderBy].toLowerCase() <
+         b[orderBy].toLowerCase()
+         ){
+           return -1 * order;
+         }else{
+           return  1 * order;
+         }
+ 
+    })
+    .filter(eachItem => {
+      return(
+        eachItem['name'] 
+        .toLowerCase()
+       .includes(queryText.toLowerCase()) ||
+        eachItem['price']
+        .toLowerCase()
+       .includes(queryText.toLowerCase()) ||
+        eachItem['text']
+        .toLowerCase()
+       .includes(queryText.toLowerCase()) 
+      );
+    })
     const shareSuites = (title, message, url) => {
       Share.share(
         {
@@ -97,17 +86,17 @@ resetForm() {
         }
       );
     };
-    const { navigate } = this.props.navigation;
+    const { navigate } = props.navigation;
   
-    const renderDirectoryItem = ({ item }) => {
+    const renderSuiteItem = ({ item }) => {
 
       
 
       return (
         <Animatable.View
         animation='fadeInDown'
-        duration={2000}
-        delay={1000}>
+        duration={1000}
+        delay={100}>
   <Card
     featuredTitle={item.name}
       
@@ -122,7 +111,7 @@ resetForm() {
         color="#f50"
         raised
         reverse
-        onPress={() =>    this.props.addItemToCart(item)}
+        onPress={() =>    props.addItemToCart(item)}
        
       />
        <Icon
@@ -149,28 +138,36 @@ resetForm() {
     };
 
    
-    if (this.props.suites.isLoading) {
+    if (props.suites.isLoading) {
       return <Loading />;
   }
-  if (this.props.suites.errMess) {
+  if (props.suites.errMess) {
       return (
           <View>
-              <Text>{this.props.suites.errMess}</Text>
+              <Text>{props.suites.errMess}</Text>
          </View>
       );
   }
   return (
-  
+  <ScrollView>
+      <View style={styles.container}>
+        <TextInput
+        placeholder=" Search Here"
+        onChangeText={(search) => setQueryText(search)}
+          style={styles.searchBar}
+        />
+    
+      </View>
         <FlatList 
-      data={this.props.suites.suites}
-      renderItem={renderDirectoryItem}
+      data={filteredSuites}
+      renderItem={renderSuiteItem}
       keyExtractor={item => item.id.toString()}
   />
- 
+ </ScrollView>
     
     );
   }
-}
+
 
 const styles=StyleSheet.create({
   cardRow: {
@@ -192,6 +189,27 @@ const styles=StyleSheet.create({
 modal: {
   justifyContent: "center",
   margin: 20,
+},  container: {
+  backgroundColor: 'black',
+  alignItems: 'center',
+  // height: '100%',
+},
+searchBar: {
+  fontSize: 24,
+  textAlign: "center",
+  borderRadius: 20,
+  margin: 10,
+  width: '90%',
+  height: 40,
+  backgroundColor: 'white',
+},
+itemText: {
+  margin: 10,
+  color: 'white',
+  fontSize: 24,
+  backgroundColor: 'blue',
+  width: '100%',
+  height: 50
 }
 })
 

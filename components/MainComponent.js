@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Platform,
@@ -19,9 +19,9 @@ import MyCart from "./MyCartComponent";
 import Login from "./LoginComponent";
 import LocationInfo from "./LocationInfoComponent";
 import Location from "./LocationComponent";
-import ShoppingCartIcon from "./ShoppingCartIconComponent";
 import { Icon } from "react-native-elements";
 import {
+  createBottomTabNavigator ,
   createStackNavigator,
   createDrawerNavigator,
   DrawerItems,
@@ -36,16 +36,34 @@ import {
   fetchCampsites,
   fetchClothes,
   fetchLocations,
+  fetchPartners
 } from "../redux/ActionCreators";
 
 const mapDispatchToProps = {
   fetchCoffees,
+  fetchPartners,
   fetchComments,
   fetchSuites,
   fetchCampsites,
   fetchClothes,
   fetchLocations,
 };
+
+const bottomNav = createBottomTabNavigator(
+  {
+      Login: MyCart,
+      Register: OnlineShopping
+  },
+  {
+      tabBarOptions: {
+          activeBackgroundColor: '#0000ff',
+          inactiveBackgroundColor: '#CEC8FF',
+          activeTintColor: '#fff',
+          inactiveTintColor: '#808080',
+          labelStyle: {fontSize: 16}
+      }
+  }
+);
 
 const HomeNavigator = createStackNavigator(
   {
@@ -62,7 +80,7 @@ const HomeNavigator = createStackNavigator(
       },
       headerLeft: (
         <Icon
-          name="home"
+          name="align-justify"
           type="font-awesome"
           iconStyle={styles.stackIcon}
           onPress={() => navigation.toggleDrawer()}
@@ -86,7 +104,7 @@ const CartScreenNavigator = createStackNavigator(
       },
       headerLeft: (
         <Icon
-          name="cart-arrow-down"
+        name="align-justify"
           type="font-awesome"
           iconStyle={styles.stackIcon}
           onPress={() => navigation.toggleDrawer()}
@@ -96,31 +114,6 @@ const CartScreenNavigator = createStackNavigator(
   }
 );
 
-const ShoppingCartNavigator = createStackNavigator(
-  {
-    ShoppingCartIcon: { screen: ShoppingCartIcon },
-  },
-  { MyCart: { screen: MyCart } },
-  {
-    navigationOptions: ({ navigation }) => ({
-      headerStyle: {
-        backgroundColor: '#37dd50',
-      },
-      headerTintColor: "#fff",
-      headerTitleStyle: {
-        color: "#fff",
-      },
-      headerLeft: (
-        <Icon
-        name="cart-arrow-down"
-          type="font-awesome"
-          iconStyle={styles.stackIcon}
-          onPress={() => navigation.toggleDrawer()}
-        />
-      ),
-    }),
-  }
-);
 
 const AboutNavigator = createStackNavigator(
   {
@@ -137,7 +130,7 @@ const AboutNavigator = createStackNavigator(
       },
       headerLeft: (
         <Icon
-          name="bullhorn"
+        name="align-justify"
           type="font-awesome"
           iconStyle={styles.stackIcon}
           onPress={() => navigation.toggleDrawer()}
@@ -153,7 +146,7 @@ const LocationNavigator = createStackNavigator(
       navigationOptions: ({ navigation }) => ({
         headerLeft: (
           <Icon
-            name="list"
+          name="align-justify"
             type="font-awesome"
             iconStyle={styles.stackIcon}
             onPress={() => navigation.toggleDrawer()}
@@ -191,7 +184,7 @@ const MemberNavigator = createStackNavigator(
       },
       headerLeft: (
         <Icon
-          name="address-card"
+        name="align-justify"
           type="font-awesome"
           iconStyle={styles.stackIcon}
           onPress={() => navigation.toggleDrawer()}
@@ -208,7 +201,7 @@ const OnlineShoppingNavigator = createStackNavigator(
       navigationOptions: ({ navigation }) => ({
         headerLeft: (
           <Icon
-            name="archive"
+          name="align-justify"
             type="font-awesome"
             iconStyle={styles.stackIcon}
             onPress={() => navigation.toggleDrawer()}
@@ -249,7 +242,7 @@ const LoginNavigator = createStackNavigator(
       },
       headerLeft: (
         <Icon
-          name="sign-in"
+        name="align-justify"
           type="font-awesome"
           iconStyle={styles.stackIcon}
           onPress={() => navigation.toggleDrawer()}
@@ -268,7 +261,7 @@ const CustomDrawerContentComponent = (props) => (
       <View style={styles.drawerHeader}>
         <View style={{ flex: 1 }}>
           <Image
-            source={require("./images/logo/logo1.jpg")}
+            source={require("./images/logo/logo2.jpg")}
             style={styles.drawerImage}
           />
         </View>
@@ -375,37 +368,34 @@ const MainNavigator = createDrawerNavigator(
     contentComponent: CustomDrawerContentComponent,
   }
 );
-
-class Main extends Component {
-  componentDidMount() {
-    this.props.fetchCoffees();
-    this.props.fetchSuites();
-    this.props.fetchCampsites();
-    this.props.fetchClothes();
-    this.props.fetchLocations();
-    this.props.fetchComments();
-    this.showNetInfo();
-
-    this.unsubscribeNetInfo = NetInfo.addEventListener((connectionInfo) => {
-      this.handleConnectivityChange(connectionInfo);
-    });
-  }
-
-  async showNetInfo() {
-    const connectionInfo = await NetInfo.fetch();
-    if (connectionInfo) {
-      Platform.OS === "ios"
-        ? Alert.alert("Initial Network Connectivity Type:", connectionInfo.type)
-        : ToastAndroid.show(
-            "Initial Network Connectivity Type: " + connectionInfo.type,
-            ToastAndroid.LONG
-          );
+const Main=(props)=>  {
+  useEffect(()=>{
+    props.fetchCoffees();
+    props.fetchSuites();
+    props.fetchCampsites();
+    props.fetchClothes();
+    props.fetchLocations();
+    props.fetchComments();
+    props.fetchPartners();
+   const showNetInfo= async ()=> {
+      const connectionInfo = await NetInfo.fetch();
+      if (connectionInfo) {
+        Platform.OS === "ios"
+          ? Alert.alert("Initial Network Connectivity Type:", connectionInfo.type)
+          : ToastAndroid.show(
+              "Initial Network Connectivity Type: " + connectionInfo.type,
+              ToastAndroid.LONG
+            );
+      }
     }
-  }
+    showNetInfo();
 
-  componentWillUnmount() {
-    this.unsubscribeNetInfo();
-  }
+  unsubscribeNetInfo = NetInfo.addEventListener((connectionInfo) => {
+      handleConnectivityChange(connectionInfo);
+   
+    });
+  },[])
+ 
 
   handleConnectivityChange = (connectionInfo) => {
     let connectionMsg = "You are now connected to an active network.";
@@ -428,7 +418,7 @@ class Main extends Component {
       : ToastAndroid.show(connectionMsg, ToastAndroid.LONG);
   };
 
-  render() {
+ 
     return (
       <View
         style={{
@@ -441,7 +431,7 @@ class Main extends Component {
       </View>
     );
   }
-}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
